@@ -1,14 +1,12 @@
 mod bundles;
 mod render;
-mod shapes;
 
-pub use shapes::{Shape, Shape2d};
 pub mod prelude {
     pub use crate::bundles::DebugShapeBundle;
     pub use crate::render::DebugShape;
     pub use crate::render::IntoRenderableShape;
     pub use crate::DebugShapesPlugin;
-    pub use crate::{Shape, Shape2d};
+    pub use bevy_cool_shapes::{Shape2d, Shape};
 }
 
 use bevy::prelude::*;

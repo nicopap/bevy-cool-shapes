@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use bevy_polyline::prelude::*;
 
-use crate::shapes::Shape;
+use bevy_cool_shapes::Shape;
 
 pub enum Display {
     Lines { line_color: Color, line_width: f32 },

@@ -1,7 +1,7 @@
 use std::f32::consts::TAU;
 use std::iter;
 
-use bevy::math::{Mat2, Vec2, Vec3, Vec3Swizzles};
+use bevy_math::{Mat2, Vec2, Vec3, Vec3Swizzles};
 
 // pub(crate) struct Triangle {
 //     pub(crate) a: Vec3,
@@ -105,7 +105,7 @@ pub enum Shape {
 }
 
 impl Shape2d {
-    fn segment(&self, density: usize) -> Vec<Vec2> {
+    pub fn segment(&self, density: usize) -> Vec<Vec2> {
         let segment_rotation = Mat2::from_angle(TAU / 4.0 / density as f32);
         let circle = |start| iter::successors(Some(start), |v| Some(segment_rotation * *v));
         let half_circle = |radius: f32| circle(-Vec2::X * radius).take(density * 2 + 1);
@@ -129,7 +129,7 @@ impl Shape2d {
     }
 }
 impl Shape {
-    pub(crate) fn segment(&self, density: usize) -> Vec<Vec3> {
+    pub fn segment(&self, density: usize) -> Vec<Vec3> {
         // chain_segments![a,b,c,d] =>
         // a.chain(iter::once(Vec3::NAN))
         //  .chain(b).chain(iter::once(Vec3::NAN))

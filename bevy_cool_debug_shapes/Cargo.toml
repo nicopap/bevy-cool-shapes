@@ -1,0 +1,15 @@
+[package]
+name = "bevy-cool-debug-shapes"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy_polyline = "0.2"
+bevy-cool-shapes = { path = "../bevy_cool_shapes", version = "0.1" }
+bevy = {version="0.7", default-features=false, features=["render"]}
+
+[dev-dependencies]
+bevy = { version = "0.7", default-features = false, features = [
+    "bevy_winit",
+    "x11",
+] }
