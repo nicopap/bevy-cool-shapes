@@ -27,23 +27,19 @@ impl Default for DebugShapeOutline {
 /// Easy extension methods on [`Shape`] to quickly create a [`DebugShapeOutline`].
 pub trait IntoRenderableShape {
     fn lines(self, color: Color, width: f32, bias: f32) -> DebugShapeOutline;
-    // fn lines_and_fill(self, color: Color) -> DebugShapeOutline;
-    // fn fill(self, color: Color) -> DebugShapeOutline;
 }
 impl IntoRenderableShape for DebugShape {
     fn lines(self, color: Color, width: f32, bias: f32) -> DebugShapeOutline {
         DebugShapeOutline { shape: self, color, width, depth_bias: bias }
     }
-    // fn lines_and_fill(self, color: Color) -> DebugShapeOutline {
-    //     DebugShapeOutline { shape: self, color, display: Display::LinesAndFill }
-    // }
-    // fn fill(self, color: Color) -> DebugShapeOutline {
-    //     DebugShapeOutline { shape: self, color, display: Display::Fill }
-    // }
 }
 
+/// Marks entites spawned by [`insert_debug_shapes`].
+///
+/// This let us recognize which child we care about and need to update.
 #[derive(Component)]
 pub(crate) struct LineMesh;
+
 // How this works: Create many children to the Entity with a DebugShapeOutline
 // component, each one a Polyline or a simple StandardMaterial with opacity
 pub(crate) fn insert_debug_shapes(
@@ -63,10 +59,58 @@ pub(crate) fn insert_debug_shapes(
         cmds.entity(entity).with_children(|cmds| {
             let bundle = PolylineBundle {
                 polyline: polylines.add(Polyline { vertices }),
-                material: material.clone(),
+                material,
                 ..default()
             };
             cmds.spawn_bundle(bundle).insert(LineMesh);
         });
+    }
+}
+pub(crate) fn update_debug_shapes(
+    mut lines: Query<(&mut Handle<Polyline>, &mut Handle<PolylineMaterial>), With<LineMesh>>,
+    mut poly_mats: ResMut<Assets<PolylineMaterial>>,
+    mut polylines: ResMut<Assets<Polyline>>,
+    shapes: Query<(&Children, &DebugShapeOutline), Changed<DebugShapeOutline>>,
+) {
+    for (children, debug) in shapes.iter() {
+        for child in children.iter() {
+            if let Ok((mut polyline, mut poly_mat)) = lines.get_mut(*child) {
+                *poly_mat = poly_mats.add(PolylineMaterial {
+                    width: debug.width,
+                    color: debug.color,
+                    perspective: true,
+                    // depth_bias: debug.depth_bias,
+                });
+                let vertices = debug.shape.outline();
+                *polyline = polylines.add(Polyline { vertices });
+            }
+        }
+    }
+}
+#[allow(clippy::type_complexity)]
+pub(crate) fn update_debug_shapes_visibility(
+    mut lines: Query<&mut Visibility, With<LineMesh>>,
+    visibilities: Query<(&Children, &Visibility), (With<DebugShapeOutline>, Changed<Visibility>)>,
+) {
+    for (children, new_vis) in visibilities.iter() {
+        for child in children.iter() {
+            if let Ok(mut visibility) = lines.get_mut(*child) {
+                visibility.is_visible = new_vis.is_visible;
+            }
+        }
+    }
+}
+pub(crate) fn remove_debug_shapes(
+    mut cmds: Commands,
+    lines: Query<(), With<LineMesh>>,
+    children: Query<&Children>,
+    removed: RemovedComponents<DebugShapeOutline>,
+) {
+    for parent in removed.iter() {
+        for child in children.get(parent).into_iter().flat_map(|p| &**p) {
+            if lines.get(*child).is_ok() {
+                cmds.entity(*child).despawn();
+            }
+        }
     }
 }

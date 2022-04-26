@@ -17,6 +17,9 @@ pub struct DebugShapesPlugin;
 impl Plugin for DebugShapesPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(PolylinePlugin)
-            .add_system(render::insert_debug_shapes);
+            .add_system(render::insert_debug_shapes)
+            .add_system(render::update_debug_shapes_visibility)
+            .add_system(render::remove_debug_shapes)
+            .add_system(render::update_debug_shapes);
     }
 }

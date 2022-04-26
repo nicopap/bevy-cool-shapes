@@ -14,9 +14,5 @@ Design:
   the proper line width despite the scaling
 
 Functionalities:
-* !! implementation of debug shape removal
-* !! implementation of debug shape update
-* !! implementation of debug shape update following `Visibility` modifier on the parent
-  entity on which the `DebugShape` component was added
 * !! Add Fill (3d mesh with surfaces)
 * !! Add a toggle for depth checking, for both line and filled rendering separately.
