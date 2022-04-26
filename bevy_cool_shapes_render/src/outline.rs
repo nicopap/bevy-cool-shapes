@@ -5,21 +5,21 @@ use bevy::math::{Mat2, Vec2, Vec3, Vec3Swizzles};
 use bevy_cool_shapes::*;
 
 #[derive(Debug, Clone)]
-pub struct DebugShape {
+pub struct OutlineableShape {
     density: usize,
-    shape: InnerDebugShape,
+    shape: OutlineableShapeEnum,
 }
-impl Default for DebugShape {
+impl Default for OutlineableShape {
     fn default() -> Self {
-        DebugShape {
+        OutlineableShape {
             density: 4,
-            shape: InnerDebugShape::Sphere(Sphere { radius: 1.0 }),
+            shape: OutlineableShapeEnum::Sphere(Sphere { radius: 1.0 }),
         }
     }
 }
 
 #[derive(Debug, Clone)]
-enum InnerDebugShape {
+enum OutlineableShapeEnum {
     Shape2d(Shape2d),
     Pyramid(Pyramid),
     Extruded(Extruded),
@@ -35,10 +35,10 @@ enum InnerDebugShape {
 }
 macro_rules! into_debug_shape {
     ($( $shape:ident ,)*) => (
-        $(impl From<$shape> for DebugShape {
+        $(impl From<$shape> for OutlineableShape{
             fn from(shape: $shape) -> Self {
                 Self {
-                    shape: InnerDebugShape::$shape(shape),
+                    shape: OutlineableShapeEnum::$shape(shape),
                     density: 4,
                 }
             }
@@ -47,10 +47,10 @@ macro_rules! into_debug_shape {
 }
 macro_rules! into_debug_shape_2d {
     ($( $shape:ident ,)*) => (
-        $(impl From<$shape> for DebugShape {
+        $(impl From<$shape> for OutlineableShape {
             fn from(shape: $shape) -> Self {
                 Self {
-                    shape: InnerDebugShape::Shape2d(Shape2d::$shape(shape)),
+                    shape: OutlineableShapeEnum::Shape2d(Shape2d::$shape(shape)),
                     density: 4,
                 }
             }
@@ -97,7 +97,7 @@ fn outline_2d(shape: &Shape2d, density: usize) -> Vec<Vec2> {
     })
 }
 
-impl DebugShape {
+impl OutlineableShape {
     pub(crate) fn outline(&self) -> Vec<Vec3> {
         // chain_segments![a,b,c,d] =>
         // a.chain(iter::once(Vec3::NAN))
@@ -117,8 +117,8 @@ impl DebugShape {
                 $( $shape:ident $binding:tt => $arm:expr ,)*
             }) => (
                 match $input {
-                    InnerDebugShape::Shape2d(ref $first_binding) => $first_arm,
-                    $( InnerDebugShape::$shape($shape $binding ) => $arm, )*
+                    OutlineableShapeEnum::Shape2d(ref $first_binding) => $first_arm,
+                    $( OutlineableShapeEnum::$shape($shape $binding ) => $arm, )*
                 }
             )
         }

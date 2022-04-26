@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 
-use crate::render::DebugShapeOutline;
+use crate::render::ShapeOutline;
 
 #[derive(Bundle, Default)]
-pub struct DebugShapeBundle {
-    pub shape: DebugShapeOutline,
+pub struct ShapeOutlineBundle {
+    pub shape: ShapeOutline,
     pub transform: Transform,
     pub global_transform: GlobalTransform,
     pub visibility: Visibility,

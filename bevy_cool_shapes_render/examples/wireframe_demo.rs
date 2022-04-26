@@ -9,7 +9,7 @@ fn main() {
         .insert_resource(ClearColor(Color::BLACK))
         .insert_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
-        .add_plugin(DebugShapesPlugin)
+        .add_plugin(RenderableShapesPlugin)
         .add_startup_system(setup)
         .add_system(enable_animation)
         .add_system(run_animation)
@@ -99,7 +99,7 @@ fn setup(
         tris: vec![],
     };
     #[rustfmt::skip]
-    let shapes: [DebugShape; I] = [
+    let shapes: [OutlineableShape; I] = [
         Disc { radius: 3. }.into(),
         HalfDisc { radius: 1.0 }.into(),
         QuarterDisc { radius: 1.9 }.into(),
@@ -182,7 +182,7 @@ fn setup(
     let animations = animations.into_iter();
     let iterator = shapes.zip(colors).zip(animations).enumerate();
     for (i, ((shape, (color, width)), (anim, pos))) in iterator {
-        let mut entity = commands.spawn_bundle(DebugShapeBundle {
+        let mut entity = commands.spawn_bundle(ShapeOutlineBundle {
             shape: shape.lines(color, width, if i == 0 { 0.4 } else { 0.0 }),
             transform: Transform::from_translation(pos),
             ..default()
