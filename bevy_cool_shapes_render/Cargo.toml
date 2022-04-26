@@ -1,5 +1,5 @@
 [package]
-name = "bevy-cool-debug-shapes"
+name = "bevy-cool-shapes-render"
 version = "0.1.0"
 edition = "2021"
 

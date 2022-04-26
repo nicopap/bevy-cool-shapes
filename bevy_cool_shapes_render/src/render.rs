@@ -87,10 +87,15 @@ pub(crate) fn update_debug_shapes(
         }
     }
 }
-#[allow(clippy::type_complexity)]
+
+type OutlinesWithChangedVisibility = (
+    Without<LineMesh>,
+    With<DebugShapeOutline>,
+    Changed<Visibility>,
+);
 pub(crate) fn update_debug_shapes_visibility(
     mut lines: Query<&mut Visibility, With<LineMesh>>,
-    visibilities: Query<(&Children, &Visibility), (With<DebugShapeOutline>, Changed<Visibility>)>,
+    visibilities: Query<(&Children, &Visibility), OutlinesWithChangedVisibility>,
 ) {
     for (children, new_vis) in visibilities.iter() {
         for child in children.iter() {

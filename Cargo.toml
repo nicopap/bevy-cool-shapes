@@ -1,3 +1,3 @@
 [workspace]
-members = ["bevy_cool_debug_shapes", "bevy_cool_shapes"]
+members = ["bevy_cool_shapes_render", "bevy_cool_shapes"]
 resolver = "2"

@@ -2,7 +2,7 @@ use std::f32::consts::TAU as TAU32;
 use std::f64::consts::TAU;
 
 use bevy::prelude::*;
-use bevy_cool_debug_shapes::prelude::*;
+use bevy_cool_shapes_render::prelude::*;
 
 fn main() {
     App::new()
