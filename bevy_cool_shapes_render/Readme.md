@@ -1,6 +1,6 @@
 # Renderable Bevy Cool shapes
 
-A shapes library based on RFC12.
+A shapes library based on [RFC 12][rfc-12].
 
 This crate implements traits and additional shapes that are ready to be rendered. It is based
 on the abstract shape definitions available in `bevy-cool-shapes`.
@@ -52,3 +52,4 @@ This will display a yellow sphere at the center of the screen as follow:
 That's it! 
 
 [debug-text-overlay]: https://github.com/nicopap/bevy-debug-text-overlay/
+[rfc-12]: https://github.com/bevyengine/rfcs/pull/12
