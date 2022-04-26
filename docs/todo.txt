@@ -3,8 +3,11 @@ Symbols:
 ??: Possibility, future exploration
 **: Alternative to keep in mind, even if decision was made to not do it
 
+Code quality:
+* !! Remove the weird `match_2d` and `match_3d` macros
+* ?? Direct conversion from shapes to `DebugShapeOutline`
+
 Design:
-* !! Separate shapes into its own crate
 * ?? separate `Display`, `Shape` and `density` in their own components
 * ** Use `Transform::scale` for size, and otherwise keep shapes stupid simple
   by only defining their unit versions. Polyline seems to be smart and keep

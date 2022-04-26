@@ -32,13 +32,16 @@ struct AnimationState {
     transform: Transform,
 }
 
-fn enable_animation(animated: Query<(Entity, &Transform), Added<Animated>>, mut cmds: Commands) {
+fn enable_animation(
+    animated: Query<(Entity, &Transform), Added<Animated>>,
+    mut commands: Commands,
+) {
     let mut cmd_buffer = Vec::new();
     for (entity, &transform) in animated.iter() {
         let state = AnimationState { transform };
         cmd_buffer.push((entity, (state,)));
     }
-    cmds.insert_or_spawn_batch(cmd_buffer);
+    commands.insert_or_spawn_batch(cmd_buffer);
 }
 
 fn run_animation(
@@ -76,11 +79,12 @@ fn star_points() -> impl Iterator<Item = Vec2> {
 }
 
 fn setup(
-    mut cmds: Commands,
+    mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut mats: ResMut<Assets<StandardMaterial>>,
 ) {
-    cmds.spawn_bundle(PerspectiveCameraBundle::new_3d())
+    commands
+        .spawn_bundle(PerspectiveCameraBundle::new_3d())
         .insert(Transform::from_xyz(25., 10., 25.).looking_at(Vec3::ZERO, Vec3::Y));
 
     // The `I` is to make sure I update all the arrays at the same time.
@@ -89,38 +93,34 @@ fn setup(
     let [x, y, z] = Vec3::AXES;
     let one = Vec3::ONE;
 
-    macro_rules! shape_2d {
-        ($name:ident { $($fields:tt)* }) => (
-            Shape::Shape2d(Shape2d::$name { $($fields)* })
-        )
-    }
-    let star = Shape2d::Polygon {
+    let star = Polygon {
         points: star_points().collect(),
         lines: star_lines().collect(),
+        tris: vec![],
     };
     #[rustfmt::skip]
-    let shapes: [_; I] = [
-        shape_2d!(Circle { radius: 3. }),
-        shape_2d!(HalfCircle { radius: 1.0 }),
-        shape_2d!(QuarterCircle { radius: 1.9 }),
-        shape_2d!(Rectangle { size: Vec2::ONE * 3.3 }),
-        shape_2d!(Triangle { a: Vec2::ZERO, b: Vec2::Y, c: Vec2::X }),
-        Shape::Shape2d(star.clone()),
-        Shape::Pyramid { base: star.clone(), height: 3.0 },
-        Shape::Extruded { base: star, height: 3.0 },
-        Shape::Sphere { radius: 2.3 },
-        Shape::HalfSphere { radius: 2.0 },
-        Shape::Capsule { radius: 1.3, segment_height: 5.0 },
-        Shape::Cuboid { size: one * 2.3 },
-        Shape::Cone { base_radius: 1.0, height: 2.0 },
-        Shape::Tetrahedron { a: Vec3::ZERO, b: x * 2., c: y * 2., d: z * 2. },
-        Shape::Tetrahedron { a: Vec3::ZERO, b: x * -2., c: y * -2., d: z * -2. },
-        Shape::Mesh {
+    let shapes: [DebugShape; I] = [
+        Disc { radius: 3. }.into(),
+        HalfDisc { radius: 1.0 }.into(),
+        QuarterDisc { radius: 1.9 }.into(),
+        Rectangle { size: Vec2::ONE * 3.3 }.into(),
+        Triangle { a: Vec2::ZERO, b: Vec2::Y, c: Vec2::X }.into(),
+        star.clone().into(),
+        Pyramid { base: Shape2d::Polygon(star.clone()), height: 3.0 }.into(),
+        Extruded { base: Shape2d::Polygon(star), height: 3.0 }.into(),
+        Sphere { radius: 2.3 }.into(),
+        HalfSphere { radius: 2.0 }.into(),
+        Capsule { radius: 1.3, segment_height: 5.0 }.into(),
+        Cuboid { size: one * 2.3 }.into(),
+        Cone { base_radius: 1.0, height: 2.0 }.into(),
+        Tetrahedron { a: Vec3::ZERO, b: x * 2., c: y * 2., d: z * 2. }.into(),
+        Tetrahedron { a: Vec3::ZERO, b: x * -2., c: y * -2., d: z * -2. }.into(),
+        Lines {
             points: vec![Vec3::ZERO, x, y, z],
             lines: vec![[0,1], [0,2], [0,3]],
-        },
-        Shape::Cylinder { height: 5., radius: 2. },
-        Shape::HeightField {
+        }.into(),
+        Cylinder { height: 5., radius: 2. }.into(),
+        HeightField {
             size: Vec2::ONE * 30.0,
             heights: vec![
                 vec![1., 1., 1., 1., 1., 1., 1., 1., 1., 1.],
@@ -134,7 +134,7 @@ fn setup(
                 // vec![0., 0., 0.6, 0.],
                 // vec![1., 1., 1., 1.],
             ],
-        },
+        }.into(),
     ];
     let colors: [_; I] = [
         (Color::CYAN, 200.0),
@@ -180,9 +180,10 @@ fn setup(
     let shapes = shapes.into_iter();
     let colors = colors.into_iter();
     let animations = animations.into_iter();
-    for ((shape, (color, width)), (anim, pos)) in shapes.zip(colors).zip(animations) {
-        let mut entity = cmds.spawn_bundle(DebugShapeBundle {
-            shape: shape.lines(color, width),
+    let iterator = shapes.zip(colors).zip(animations).enumerate();
+    for (i, ((shape, (color, width)), (anim, pos))) in iterator {
+        let mut entity = commands.spawn_bundle(DebugShapeBundle {
+            shape: shape.lines(color, width, if i == 0 { 0.4 } else { 0.0 }),
             transform: Transform::from_translation(pos),
             ..default()
         });
@@ -190,7 +191,7 @@ fn setup(
             entity.insert(animation);
         }
     }
-    cmds.spawn_bundle(PbrBundle {
+    commands.spawn_bundle(PbrBundle {
         mesh: meshes.add(shape::Cube::new(10.).into()),
         material: mats.add(Color::WHITE.into()),
         ..default()
